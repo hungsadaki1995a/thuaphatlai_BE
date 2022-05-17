@@ -105,7 +105,7 @@ class Carousel extends BaseController
 
 		// create carousel
 		try {
-			$imageUrl = $params['image_url'];
+			$imageUrl = $params['image'];
 			$showOnScreen = $params['show_on_screen'] ?? 1;
 			$current_date = date("Y-m-d H:i:s");
 			$maxOrderNumber = self::getMaxOrderNumber();
@@ -113,7 +113,7 @@ class Carousel extends BaseController
 
 			// insert carousel
 			$insertCarouselQuery = "
-                INSERT INTO $this->table (image_url, show_on_screen, display_order, created_date, updated_date)
+                INSERT INTO $this->table (image, show_on_screen, display_order, created_date, updated_date)
 					VALUES ('$imageUrl', '$showOnScreen', '$maxOrderNumber', '$current_date', '$current_date');
             ";
 			$stmt = $this->pdo->prepare($insertCarouselQuery);
@@ -165,7 +165,7 @@ class Carousel extends BaseController
 
 		// update carousel
 		try {
-			$imageUrl = $params['image_url'] ?? $carousel['image_url'];
+			$imageUrl = $params['image'] ?? $carousel['image'];
 			$showOnScreen = $params['show_on_screen'] ?? $carousel['show_on_screen'];
 
 			// validate show on screen
@@ -184,7 +184,7 @@ class Carousel extends BaseController
 			$updated_date = date("Y-m-d H:i:s");
 			$query = "
                 UPDATE $this->table
-                SET image_url= :image_url,
+                SET image= :image,
                     show_on_screen= :show_on_screen,
                     updated_date= :updated_date
                 WHERE id= :id
@@ -192,7 +192,7 @@ class Carousel extends BaseController
 			$stmt = $this->pdo->prepare($query);
 			// assign params
 			$stmt->bindParam(':id', $carouselId);
-			$stmt->bindParam(':image_url', $imageUrl);
+			$stmt->bindParam(':image', $imageUrl);
 			$stmt->bindParam(':show_on_screen', $showOnScreen, PDO::PARAM_INT);
 			$stmt->bindParam(':updated_date', $updated_date);
 			// exec update query
@@ -309,7 +309,7 @@ class Carousel extends BaseController
 		try {
 			// remove image
 			if ($isDeleteImage) {
-				$isDeleteSuccess = File::removeSingleFile($carousel['image_url']);
+				$isDeleteSuccess = File::removeSingleFile($carousel['image']);
 				if (!$isDeleteSuccess) {
 					$this->response->setContent(json_encode(array(
 						'status' => Constants::RESPONSE_STATUS_FAIL,
@@ -420,9 +420,9 @@ class Carousel extends BaseController
 	private function validate(array $params): array
 	{
 		$err = array();
-		// image_url
-		if (empty($params['image_url'])) {
-			$err['image_url'] = "Image url is required";
+		// image
+		if (empty($params['image'])) {
+			$err['image'] = "Image url is required";
 		}
 		return $err;
 	}
