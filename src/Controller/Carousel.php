@@ -42,6 +42,7 @@ class Carousel extends BaseController
 
 	/**
 	 * Get detail carousel
+	 * @param $params
 	 */
 	public function getDetail($params)
 	{
@@ -281,6 +282,7 @@ class Carousel extends BaseController
 		$rawBody = $this->request->getRawBody();
 		$params = json_decode($rawBody, true);
 		$carouselId = $params['id'] ?? '';
+		$isDeleteImage = $params['is_delete_image'] ?? true;
 
 		// validate isset id
 		if (empty($carouselId)) {
@@ -305,6 +307,19 @@ class Carousel extends BaseController
 
 		// delete carousel
 		try {
+			// remove image
+			if ($isDeleteImage) {
+				$isDeleteSuccess = File::removeSingleFile($carousel['image_url']);
+				if (!$isDeleteSuccess) {
+					$this->response->setContent(json_encode(array(
+						'status' => Constants::RESPONSE_STATUS_FAIL,
+						'data' => [],
+						'message' => 'Delete image of carousel failed.'
+					), JSON_PRETTY_PRINT));
+					return;
+				}
+			}
+
 			$query = "
 				DELETE FROM carousel
 				WHERE carousel.id= :id

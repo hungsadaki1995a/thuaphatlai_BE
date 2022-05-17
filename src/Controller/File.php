@@ -23,12 +23,13 @@ class File extends BaseController
 
 		list($success, $error, $message) = self::uploadFile($_FILES['file']);
 
+		if (count($success) == 0) {
+			$this->status = Constants::RESPONSE_STATUS_FAIL;
+		}
+
 		$content = json_encode(array(
 			'status' => $this->status,
-			'data' => array(
-				'success' => $success,
-				'error' => $error
-			),
+			'data' => $success,
 			'message' => $message
 		), JSON_PRETTY_PRINT);
 
@@ -55,14 +56,13 @@ class File extends BaseController
 		// handle remove file
 		list($success, $error, $message) = self::removeFile($files['file_name']);
 
-		$this->response->setHeader('Content-Type', 'application/json');
+		if (count($success) == 0) {
+			$this->status = Constants::RESPONSE_STATUS_FAIL;
+		}
 
 		$content = json_encode(array(
 			'status' => $this->status,
-			'data' => array(
-				'success' => $success,
-				'error' => $error
-			),
+			'data' => $success,
 			'message' => $message
 		), JSON_PRETTY_PRINT);
 
@@ -105,7 +105,7 @@ class File extends BaseController
 			}
 
 			// check error and exist
-			if (isset($message[$i]) && count($message[$i]) > 0) {
+			if (isset($message[$i])) {
 				$error[$i] = $fullFileName;
 				continue;
 			}
@@ -124,7 +124,7 @@ class File extends BaseController
 				$message[$i] = 'Can not save file';
 				continue;
 			} else {
-				$success[$i] = $_SERVER['HTTP_HOST'] . Constants::UPLOAD_FOLDER . $newFileName;
+				$success[$i] = $newFileName;
 			}
 			// delete tmp file
 			unlink($fileTmpPath);
@@ -165,5 +165,27 @@ class File extends BaseController
 		}
 
 		return array($success, $errors, $messages);
+	}
+
+	/**
+	 * Remove single file
+	 * @param $file_name string
+	 * @return bool
+	 */
+	public static function removeSingleFile(string $file_name): bool
+	{
+		$result = false;
+		$filePath = $_SERVER['DOCUMENT_ROOT'] . Constants::UPLOAD_FOLDER . $file_name;
+		// check exist file
+		if (!file_exists($filePath)) {
+			return $result;
+		}
+		// remove file
+		if (!unlink($filePath)) {
+			return $result;
+		} else {
+			$result = true;
+		}
+		return $result;
 	}
 }
