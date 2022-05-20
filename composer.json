@@ -8,12 +8,14 @@
     "vlucas/phpdotenv": "5.4.1",
     "filp/whoops": "~2.1",
     "patricklouys/http": "~1.4",
-    "rdlowrey/auryn": "^1.4"
+    "rdlowrey/auryn": "^1.4",
+    "firebase/php-jwt": "^6.2"
   },
   "autoload": {
     "psr-4": {
       "Src\\": "src/",
-      "Controller\\": "src/Controller/"
+      "Controller\\": "src/Controller/",
+      "Service\\": "src/Service"
     }
   }
 }
