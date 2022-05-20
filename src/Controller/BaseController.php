@@ -4,8 +4,9 @@ namespace Controller;
 
 use Http\Request;
 use Http\Response;
+use Service\Auth;
+use Src\Constants;
 use PDO;
-use Src;
 
 abstract class BaseController
 {
@@ -13,7 +14,7 @@ abstract class BaseController
 	protected Response $response;
 	protected PDO $pdo;
 
-	protected string $status = Src\Constants::RESPONSE_STATUS_SUCCESS;
+	protected string $status = Constants::RESPONSE_STATUS_SUCCESS;
 	protected array $message = [];
 
 	public function __construct(Request $request, Response $response, PDO $pdo)
@@ -21,6 +22,16 @@ abstract class BaseController
 		$this->request = $request;
 		$this->response = $response;
 		$this->pdo = $pdo;
+	}
+
+	public function checkAuth()
+	{
+		$authService = new Auth();
+		$isValidToken = $authService->validateJWT();
+		if (!$isValidToken) {
+			$this->response->setContent("401 - Invalid credential");
+			$this->response->setStatusCode(401);
+		}
 	}
 
 	public function getList()
