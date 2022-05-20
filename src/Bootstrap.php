@@ -26,12 +26,14 @@ if (isset($_SERVER['HTTP_ORIGIN'])) {
 // Access-Control headers are received during OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
-	if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-		// may also be using PUT, PATCH, HEAD etc
+	if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])) // may also be using PUT, PATCH, HEAD etc
+	{
 		header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+	}
 
-	if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+	if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
 		header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+	}
 
 	exit(0);
 }
@@ -79,10 +81,20 @@ switch ($routeInfo[0]) {
 	case \FastRoute\Dispatcher::FOUND:
 		$className = $routeInfo[1][0];
 		$method = $routeInfo[1][1];
+		$guard = isset($routeInfo[1][2]) ? $routeInfo[1][2] : '';
 		$vars = $routeInfo[2];
 
 		// create class
 		$class = $injector->make($className);
+
+		//call guard method
+		if (!empty($guard)) {
+			// check for case invalid credential
+			$class->$guard();
+			if ($response->getStatusCode() === 401) {
+				break;
+			}
+		}
 		// call method from created class
 		$class->$method($vars);
 		break;

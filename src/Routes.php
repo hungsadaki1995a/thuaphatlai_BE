@@ -37,14 +37,14 @@ class Routes
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/file/upload',
-				'handler' => ['Controller\File', 'upload']
+				'handler' => ['Controller\File', 'upload', 'checkAuth']
 			),
 			array(
 				// remove file
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/file/remove',
-				'handler' => ['Controller\File', 'remove']
+				'handler' => ['Controller\File', 'remove', 'checkAuth']
 			),
 			/* upload file api end */
 
@@ -68,21 +68,21 @@ class Routes
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/users/create',
-				'handler' => ['Controller\User', 'create']
+				'handler' => ['Controller\User', 'create', 'checkAuth']
 			),
 			array(
 				// update user
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/users/update',
-				'handler' => ['Controller\User', 'update']
+				'handler' => ['Controller\User', 'update', 'checkAuth']
 			),
 			array(
 				// delete user
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/users/delete',
-				'handler' => ['Controller\User', 'delete']
+				'handler' => ['Controller\User', 'delete', 'checkAuth']
 			),
 			array(
 				// get all users
@@ -113,28 +113,28 @@ class Routes
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/carousel/create',
-				'handler' => ['Controller\Carousel', 'create']
+				'handler' => ['Controller\Carousel', 'create', 'checkAuth']
 			),
 			array(
 				// update carousel
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/carousel/update',
-				'handler' => ['Controller\Carousel', 'update']
+				'handler' => ['Controller\Carousel', 'update', 'checkAuth']
 			),
 			array(
 				// delete carousel
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/carousel/delete',
-				'handler' => ['Controller\Carousel', 'delete']
+				'handler' => ['Controller\Carousel', 'delete', 'checkAuth']
 			),
 			array(
 				// update carousel order
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/carousel/order/swap',
-				'handler' => ['Controller\Carousel', 'swapCarouselOrder']
+				'handler' => ['Controller\Carousel', 'swapCarouselOrder', 'checkAuth']
 			),
 			/* carousel api end */
 
@@ -158,21 +158,21 @@ class Routes
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/introduce/create',
-				'handler' => ['Controller\Introduce', 'create']
+				'handler' => ['Controller\Introduce', 'create', 'checkAuth']
 			),
 			array(
 				// update introduce
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/introduce/update',
-				'handler' => ['Controller\Introduce', 'update']
+				'handler' => ['Controller\Introduce', 'update', 'checkAuth']
 			),
 			array(
 				// delete introduce
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/introduce/delete',
-				'handler' => ['Controller\Introduce', 'delete']
+				'handler' => ['Controller\Introduce', 'delete', 'checkAuth']
 			),
 			/* introduce api end */
 
@@ -196,21 +196,21 @@ class Routes
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/service/create',
-				'handler' => ['Controller\Service', 'create']
+				'handler' => ['Controller\Service', 'create', 'checkAuth']
 			),
 			array(
 				// update service
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/service/update',
-				'handler' => ['Controller\Service', 'update']
+				'handler' => ['Controller\Service', 'update', 'checkAuth']
 			),
 			array(
 				// delete service
 				'method' => 'POST',
 				'prefix' => '/api/v1',
 				'path' => '/service/delete',
-				'handler' => ['Controller\Service', 'delete']
+				'handler' => ['Controller\Service', 'delete', 'checkAuth']
 			),
 			/* service api end */
 		);

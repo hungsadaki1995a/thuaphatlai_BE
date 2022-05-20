@@ -2,7 +2,8 @@
 
 namespace Src;
 
-class Utils {
+class Utils
+{
 	public function isValidEmail(string $email): bool
 	{
 		if (preg_match("/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/", $email) === 1) {
@@ -41,4 +42,10 @@ class Utils {
 			mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
 		);
 	}
+
+	public static function getDomainUrl(): string
+	{
+		return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+	}
+
 }
