@@ -4,10 +4,11 @@ namespace Controller;
 
 use PDO;
 use Src\Constants;
+use Src\Utils;
 
-class Service extends BaseController
-{
-	private string $table = 'services';
+class Contact extends BaseController {
+
+	private string $table = 'contacts';
 
 	public function checkAuth()
 	{
@@ -15,25 +16,24 @@ class Service extends BaseController
 	}
 
 	/**
-	 * Get all service
+	 * Get all contact
 	 */
 	public function getList()
 	{
 		$list = array();
-		$type = $this->request->getParameter('type', '');
-
+		$reply = $this->request->getParameter('is_reply', '');
 		try {
 			$query = "SELECT * FROM $this->table";
-			if ($type !== '') {
-				if (!in_array($type, [Constants::DEFAULT_SERVICE, Constants::OTHER_SERVICE])) {
+			if ($reply !== '') {
+				if(!in_array($reply, [Constants::NOT_REPLY, Constants::REPLIED])){
 					$this->response->setContent(json_encode(array(
 						'status' => Constants::RESPONSE_STATUS_FAIL,
 						'data' => [],
-						'message' => 'Service type is incorrect'
+						'message' => 'Contact reply is incorrect'
 					), JSON_PRETTY_PRINT));
 					return;
 				}
-				$query .= " WHERE other_service_flg=$type";
+				$query .= " WHERE is_reply=$reply";
 			}
 			$stmt = $this->pdo->prepare($query);
 			$stmt->execute();
@@ -41,7 +41,7 @@ class Service extends BaseController
 		} catch (\Exception $exception) {
 			parent::setStatusMessages(
 				Constants::RESPONSE_STATUS_FAIL,
-				'Failed to get service'
+				'Failed to get contact'
 			);
 		}
 
@@ -55,7 +55,7 @@ class Service extends BaseController
 	}
 
 	/**
-	 * Get detail service
+	 * Get detail contact
 	 * @param $params
 	 */
 	public function getDetail($params)
@@ -78,7 +78,7 @@ class Service extends BaseController
 				$result = [];
 				parent::setStatusMessages(
 					Constants::RESPONSE_STATUS_FAIL,
-					'Service not found'
+					'Contact not found'
 				);
 			}
 		} catch (\Exception $e) {
@@ -98,7 +98,7 @@ class Service extends BaseController
 	}
 
 	/**
-	 * Add new service
+	 * Add new contact
 	 */
 	public function create()
 	{
@@ -117,20 +117,22 @@ class Service extends BaseController
 			return;
 		}
 
-		// create service
+		// create contact
 		try {
-			$title = $params['title'];
-			$description = $params['description'] ?? '';
+			$name = $params['name'];
+			$phone = $params['phone'];
+			$address = $params['address'];
+			$email = $params['email'];
 			$content = $params['content'];
-			$primaryImageUrl = $params['primary_image_url'];
-			$other_service_flg = $params['other_service_flg'] ?? Constants::DEFAULT_SERVICE;
-			$current_date = date("Y-m-d H:i:s");
+			$reply = $params['is_reply'] ?? Constants::NOT_REPLY;
+			$currentDate = date("Y-m-d H:i:s");
 
-			$query = "
-                INSERT INTO $this->table (title, description, content, primary_image_url, other_service_flg, created_date, updated_date)
-				VALUES ('$title', '$description', '$content', '$primaryImageUrl', '$other_service_flg', '$current_date', '$current_date')
+			// insert contact
+			$insertContactQuery = "
+                INSERT INTO $this->table (name, phone, address, email, content, is_reply, created_date, updated_date)
+					VALUES ('$name', '$phone', '$address',  '$email', '$content', '$reply', '$currentDate', '$currentDate');
             ";
-			$stmt = $this->pdo->prepare($query);
+			$stmt = $this->pdo->prepare($insertContactQuery);
 			$stmt->execute();
 		} catch (\Exception $exception) {
 			parent::setStatusMessages(
@@ -148,16 +150,16 @@ class Service extends BaseController
 	}
 
 	/**
-	 * Update a service
+	 * Update a contact
 	 */
 	public function update()
 	{
 		$rawBody = $this->request->getRawBody();
 		$params = json_decode($rawBody, true);
-		$serviceId = $params['id'] ?? '';
+		$contactId = $params['id'] ?? '';
 
 		// validate isset id
-		if (empty($serviceId)) {
+		if (empty($contactId)) {
 			$this->response->setContent(json_encode(array(
 				'status' => Constants::RESPONSE_STATUS_FAIL,
 				'data' => [],
@@ -166,44 +168,60 @@ class Service extends BaseController
 			return;
 		}
 
-		// validate exist service
-		$service = self::findById($serviceId);
-		if (!$service) {
+		// validate exist contact
+		$contact = self::findById($contactId);
+		if (!$contact) {
 			$this->response->setContent(json_encode(array(
 				'status' => Constants::RESPONSE_STATUS_FAIL,
 				'data' => [],
-				'message' => 'Service not exist'
+				'message' => 'Contact not exist'
 			), JSON_PRETTY_PRINT));
 			return;
 		}
 
-		// update service
+		// update contact
 		try {
-			$title = $params['title'] ?? $service['title'];
-			$description = $params['description'] ?? $service['description'];
-			$content = $params['content'] ?? $service['content'];
-			$primaryImageUrl = $params['primary_image_url'] ?? $service['primary_image_url'];
-			$otherServiceFlg = $params['other_service_flg'] ?? $service['other_service_flg'];
+			$name = $params['name'] ?? $contact['name'];
+			$phone = $params['phone'] ?? $contact['phone'];
+			$address = $params['address'] ?? $contact['address'];
+			$email = $params['email'] ?? $contact['email'];
+			$content = $params['content'] ?? $contact['content'];
+			$reply = $params['is_reply'] ?? $contact['is_reply'];
+
+			// validate show on screen
+			if (isset($params['is_reply'])) {
+				if (!in_array($params['is_reply'],
+					array(Constants::NOT_REPLY, Constants::REPLIED))) {
+					$this->response->setContent(json_encode(array(
+						'status' => Constants::RESPONSE_STATUS_FAIL,
+						'data' => [],
+						'message' => 'Reply is wrong'
+					), JSON_PRETTY_PRINT));
+					return;
+				}
+			}
 
 			$updated_date = date("Y-m-d H:i:s");
 			$query = "
                 UPDATE $this->table
-                SET title= :title,
-                    description= :description,
+                SET name= :name,
+                    phone= :phone,
+                    address= :address,
+                    email= :email,
                     content= :content,
-                    primary_image_url= :primary_image_url,
-                    other_service_flg= :other_service_flg,
+                    is_reply= :is_reply,
                     updated_date= :updated_date
                 WHERE id= :id
             ";
 			$stmt = $this->pdo->prepare($query);
 			// assign params
-			$stmt->bindParam(':id', $serviceId);
-			$stmt->bindParam(':title', $title);
-			$stmt->bindParam(':description', $description);
+			$stmt->bindParam(':id', $contactId);
+			$stmt->bindParam(':name', $name);
+			$stmt->bindParam(':phone', $phone);
+			$stmt->bindParam(':address', $address);
+			$stmt->bindParam(':email', $email);
 			$stmt->bindParam(':content', $content);
-			$stmt->bindParam(':primary_image_url', $primaryImageUrl);
-			$stmt->bindParam(':other_service_flg', $otherServiceFlg, PDO::PARAM_INT);
+			$stmt->bindParam(':is_reply', $reply);
 			$stmt->bindParam(':updated_date', $updated_date);
 			// exec update query
 			$stmt->execute();
@@ -213,23 +231,23 @@ class Service extends BaseController
 
 		$result = json_encode(array(
 			'status' => $this->status,
-			'data' => $serviceId,
+			'data' => $contactId,
 			'message' => $this->message
 		), JSON_PRETTY_PRINT);
 		$this->response->setContent($result);
 	}
 
 	/**
-	 * Delete a service
+	 * Delete a contact
 	 */
 	public function delete()
 	{
 		$rawBody = $this->request->getRawBody();
 		$params = json_decode($rawBody, true);
-		$serviceId = $params['id'] ?? '';
+		$contactId = $params['id'] ?? '';
 
 		// validate isset id
-		if (empty($serviceId)) {
+		if (empty($contactId)) {
 			$this->response->setContent(json_encode(array(
 				'status' => Constants::RESPONSE_STATUS_FAIL,
 				'data' => [],
@@ -238,22 +256,25 @@ class Service extends BaseController
 			return;
 		}
 
-		// validate exist service
-		$carousel = self::findById($serviceId);
-		if (!$carousel) {
+		// validate exist contact
+		$contact = self::findById($contactId);
+		if (!$contact) {
 			$this->response->setContent(json_encode(array(
 				'status' => Constants::RESPONSE_STATUS_FAIL,
 				'data' => [],
-				'message' => 'Service not exist'
+				'message' => 'Contact not exist'
 			), JSON_PRETTY_PRINT));
 			return;
 		}
 
-		// delete service
+		// delete contact
 		try {
-			$query = "DELETE FROM $this->table WHERE id= :id";
+			$query = "
+				DELETE FROM $this->table
+				WHERE id= :id
+			";
 			$stmt = $this->pdo->prepare($query);
-			$stmt->bindParam(':id', $serviceId, PDO::PARAM_INT);
+			$stmt->bindParam(':id', $contactId, PDO::PARAM_INT);
 			$stmt->execute();
 		} catch (\Exception $e) {
 			parent::setStatusMessages(Constants::RESPONSE_STATUS_FAIL, $e->getMessage());
@@ -262,19 +283,19 @@ class Service extends BaseController
 		$result = json_encode(array(
 			'status' => $this->status,
 			'data' => [],
-			'message' => 'Delete service success'
+			'message' => $this->message
 		), JSON_PRETTY_PRINT);
 		$this->response->setContent($result);
 	}
 
 	/**
-	 * Find service by id
+	 * Find contact by id
 	 * @param $id int
-	 * @return false | object service
+	 * @return false | object contact
 	 */
 	public function findById(int $id)
 	{
-		$query = "SELECT * FROM " . $this->table . " WHERE id= :id";
+		$query = "SELECT * FROM $this->table WHERE id= :id";
 		$stmt = $this->pdo->prepare($query);
 		$stmt->bindParam(':id', $id, PDO::PARAM_INT);
 		$stmt->execute();
@@ -284,19 +305,38 @@ class Service extends BaseController
 	private function validate(array $params): array
 	{
 		$err = array();
-		// title
-		if (empty($params['title'])) {
-			$err['title'] = "Title is required";
+
+		// name
+		if (empty($params['name'])) {
+			$err['name'] = "Name is required";
 		}
+
+		// phone
+		if (empty($params['phone'])) {
+			$err['phone'] = "Phone number is required";
+		}
+
+		// address
+		if (empty($params['address'])) {
+			$err['address'] = "Address is required";
+		}
+
+		// email
+		if (empty($params['email'])) {
+			$err['email'] = "Email is required";
+		} else {
+			if (!Utils::isValidEmail($params['email'])) {
+				$err['email'] = "Email is invalid";
+			}
+		}
+
 		// content
 		if (empty($params['content'])) {
 			$err['content'] = "Content is required";
 		}
-		// primary_image_url
-		if (empty($params['primary_image_url'])) {
-			$err['primary_image_url'] = "Primary image url is required";
-		}
 
 		return $err;
 	}
+
+
 }
