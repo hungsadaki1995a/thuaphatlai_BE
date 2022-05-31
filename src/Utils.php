@@ -4,7 +4,7 @@ namespace Src;
 
 class Utils
 {
-	public function isValidEmail(string $email): bool
+	public static function isValidEmail(string $email): bool
 	{
 		if (preg_match("/^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$/", $email) === 1) {
 			return true;

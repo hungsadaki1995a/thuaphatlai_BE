@@ -213,6 +213,44 @@ class Routes
 				'handler' => ['Controller\Service', 'delete', 'checkAuth']
 			),
 			/* service api end */
+
+			/* contact api start */
+			array(
+				// get all contact
+				'method' => 'GET',
+				'prefix' => '/api/v1',
+				'path' => '/contact',
+				'handler' => ['Controller\Contact', 'getList']
+			),
+			array(
+				// get contact
+				'method' => 'GET',
+				'prefix' => '/api/v1',
+				'path' => '/contact/{id}',
+				'handler' => ['Controller\Contact', 'getDetail']
+			),
+			array(
+				// add new contact
+				'method' => 'POST',
+				'prefix' => '/api/v1',
+				'path' => '/contact/create',
+				'handler' => ['Controller\Contact', 'create']
+			),
+			array(
+				// update contact
+				'method' => 'POST',
+				'prefix' => '/api/v1',
+				'path' => '/contact/update',
+				'handler' => ['Controller\Contact', 'update', 'checkAuth']
+			),
+			array(
+				// delete contact
+				'method' => 'POST',
+				'prefix' => '/api/v1',
+				'path' => '/contact/delete',
+				'handler' => ['Controller\Contact', 'delete', 'checkAuth']
+			),
+			/* contact api end */
 		);
 	}
 }

@@ -21,4 +21,12 @@ class Constants
 	];
 	const MAX_FILE_SIZE_UPLOAD = 3145728; // 3 MB (1 byte * 1024 * 1024 * 3 (for 3 MB))
 
+	// service
+	const DEFAULT_SERVICE = 0;
+	const OTHER_SERVICE = 1;
+
+	// contact
+	const NOT_REPLY = 0;
+	const REPLIED = 1;
+
 }
