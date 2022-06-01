@@ -122,7 +122,7 @@ class Contact extends BaseController {
 			$name = $params['name'];
 			$phone = $params['phone'];
 			$address = $params['address'];
-			$email = $params['email'];
+			$email = $params['email'] ?? '';
 			$content = $params['content'];
 			$reply = $params['is_reply'] ?? Constants::NOT_REPLY;
 			$currentDate = date("Y-m-d H:i:s");
@@ -322,12 +322,8 @@ class Contact extends BaseController {
 		}
 
 		// email
-		if (empty($params['email'])) {
-			$err['email'] = "Email is required";
-		} else {
-			if (!Utils::isValidEmail($params['email'])) {
-				$err['email'] = "Email is invalid";
-			}
+		if (isset($params['email']) && !Utils::isValidEmail($params['email'])) {
+			$err['email'] = "Email is invalid";
 		}
 
 		// content
