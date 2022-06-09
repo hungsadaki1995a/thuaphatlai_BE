@@ -24,7 +24,7 @@ class Auth
 		$issueAtTime = time(); // issued at
 		$notBeforeTime = $issueAtTime + 10; //not before in seconds
 		// jwt valid for 60 days (60 seconds * 60 minutes * 24 hours * 60 days)
-		$expireTime = $expire > 0 ? $expire : $issueAtTime + 60 * 60; // expire time in seconds
+		$expireTime = $expire > 0 ? $expire : $issueAtTime + 60 * 60 * 12; // expire time in seconds
 		$token = array(
 			"iss" => $serverName,
 			"aud" => $serverName,
